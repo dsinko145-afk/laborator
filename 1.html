@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота з 3D-візуалізацією</title>
+    <style>
+        button { margin: 10px; padding: 10px; border-radius: 5px; }
+        #start { background-color: lightblue; }
+        #stop { background-color: lightcoral; }
+        canvas { display: block; margin: 20px auto; border: 1px solid black; }
+        body { text-align: center; font-family: Arial, sans-serif; }
+    </style>
+</head>
+<body>
+    <h1>Лабораторна робота №1</h1>
+    <h2>Тема: Визначення прискорення тіла під час рівноприскореного руху</h2>
+    <h3>Мета: Визначити прискорення руху кульки</h3>
+
+    <div>
+        <label for="distance">Введіть відстань (s) в метрах: </label>
+        <input type="number" id="distance" step="0.01" value="5">
+    </div>
+
+    <div>
+        <label for="time">Введіть середній час t в секундах: </label>
+        <input type="number" id="time" step="0.01" value="2">
+    </div>
+
+    <button id="start" onclick="startSimulation()">Почати симуляцію</button>
+    <button id="stop" onclick="stopSimulation()">Зупинити симуляцію</button>
+    <p>Прискорення: <span id="acceleration"></span> м/с²</p>
+
+    <canvas id="3dcanvas" width="800" height="400"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script>
+        // Налаштування 3D-сцени
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(75, 800 / 400, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('3dcanvas') });
+        renderer.setSize(800, 400);
+        document.body.appendChild(renderer.domElement);
+
+        // Додавання площини (жолоб)
+        let geometryPlane = new THREE.PlaneGeometry(10, 1);
+        let materialPlane = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, side: THREE.DoubleSide });
+        let plane = new THREE.Mesh(geometryPlane, materialPlane);
+        plane.rotation.x = -Math.PI / 6;  // Нахил площини (жолоба)
+        plane.position.y = -1;
+        scene.add(plane);
+
+        // Додавання кульки
+        let geometryBall = new THREE.SphereGeometry(0.2, 32, 32);
+        let materialBall = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        let ball = new THREE.Mesh(geometryBall, materialBall);
+        ball.position.set(-4, 0, 0);  // Початкова позиція кульки
+        scene.add(ball);
+
+        camera.position.z = 5;
+
+        // Обчислення прискорення
+        function calculateAcceleration() {
+            const s = parseFloat(document.getElementById('distance').value);
+            const t = parseFloat(document.getElementById('time').value);
+            const acceleration = (2 * s) / (t * t);
+            document.getElementById('acceleration').textContent = acceleration.toFixed(2);
+            return acceleration;
+        }
+
+        // Початкові налаштування для симуляції
+        let isSimulating = false;
+        let speed = 0;
+        let position = -4;  // Початкова позиція кульки
+        let acceleration = calculateAcceleration();
+
+        function startSimulation() {
+            isSimulating = true;
+            position = -4;  // Початкова позиція кульки
+            acceleration = calculateAcceleration();
+            speed = 0;  // Початкова швидкість
+            animate();
+        }
+
+        function stopSimulation() {
+            isSimulating = false;
+        }
+
+        // Анімація руху кульки
+        function animate() {
+            if (isSimulating) {
+                requestAnimationFrame(animate);
+
+                // Рух кульки з прискоренням
+                speed += acceleration * 0.01;  // Додавання прискорення до швидкості
+                position += speed * 0.01;  // Зміщення кульки
+
+                if (position >= 4) {  // Зупинити кульку після досягнення кінця жолоба
+                    stopSimulation();
+                }
+
+                ball.position.x = position;  // Оновлення позиції кульки
+            }
+            renderer.render(scene, camera);
+        }
+
+        // Почати рендеринг сцени
+        animate();
+    </script>
+</body>
+</html>
