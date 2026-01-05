@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота 7</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: auto;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .enter-data { background-color: #4CAF50; }
+        .calculate-data { background-color: #2196F3; }
+        .reset-data { background-color: #f44336; }
+        .back-home { background-color: #9c27b0; }
+        .hidden { display: none; }
+        /* 3D модель */
+        .cube {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 50px auto;
+            transform-style: preserve-3d;
+            transform: rotateX(30deg) rotateY(-45deg);
+            animation: rotate 6s infinite linear;
+        }
+        .cube div {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 100, 250, 0.5);
+            border: 2px solid #0a5;
+        }
+        .cube .front  { transform: translateZ(50px); }
+        .cube .back   { transform: rotateY(180deg) translateZ(50px); }
+        .cube .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .cube .right  { transform: rotateY(90deg) translateZ(50px); }
+        .cube .top    { transform: rotateX(90deg) translateZ(50px); }
+        .cube .bottom { transform: rotateX(-90deg) translateZ(50px); }
+        @keyframes rotate {
+            0% { transform: rotateX(30deg) rotateY(-45deg); }
+            100% { transform: rotateX(30deg) rotateY(315deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContent">
+        <h1>Лабораторна робота №7</h1>
+        <h2>Тема</h2>
+        <p>Вивчення закону збереження механічної енергії</p>
+
+        <h2>Мета</h2>
+        <p>Переконатися, що повна механічна енергія замкненої системи тіл залишається незмінною за дії тільки сил тяжіння та пружності.</p>
+
+        <h2>Обладнання</h2>
+        <p>Штатив із муфтою, динамометр, набір тягарців, лінійка (40–50 см), гумовий шнур (15 см), олівець, міцна нитка.</p>
+
+        <div class="buttons">
+            <button class="button enter-data" onclick="showCalculationForm()">Внести дані</button>
+            <button class="button calculate-data" onclick="show3DModel()">Обчислити дані</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="calculationForm">
+        <h2>Введіть дані для обчислення</h2>
+        <form id="dataForm">
+            <label for="weight">Вага тягарця (Н):</label>
+            <input type="number" id="weight" name="weight" step="any" required><br><br>
+
+            <label for="stretch">Видовження шнура (м):</label>
+            <input type="number" id="stretch" name="stretch" step="any" required><br><br>
+
+            <label for="elasticForce">Сила пружності (Н):</label>
+            <input type="number" id="elasticForce" name="elasticForce" step="any" required><br><br>
+
+            <label for="height">Висота підйому (м):</label>
+            <input type="number" id="height" name="height" step="any" required><br><br>
+
+            <div class="buttons">
+                <button type="button" class="button calculate-data" onclick="calculateEnergy()">Розрахувати</button>
+                <button type="button" class="button reset-data" onclick="resetData()">Скинути дані</button>
+                <button type="button" class="button back-home" onclick="goHome()">На головну</button>
+            </div>
+        </form>
+        <p id="result"></p>
+    </div>
+
+    <div class="container hidden" id="3DModelContainer">
+        <h2>3D Модель</h2>
+        <div class="cube">
+            <div class="front"></div>
+            <div class="back"></div>
+            <div class="left"></div>
+            <div class="right"></div>
+            <div class="top"></div>
+            <div class="bottom"></div>
+        </div>
+        <p>Результати обчислень:</p>
+        <p id="calculationResult"></p>
+
+        <div class="buttons">
+            <button type="button" class="button back-home" onclick="goHome()">На головну</button>
+        </div>
+    </div>
+
+    <script>
+        function showCalculationForm() {
+            document.getElementById("mainContent").classList.add("hidden");
+            document.getElementById("calculationForm").classList.remove("hidden");
+        }
+
+        function show3DModel() {
+            document.getElementById("mainContent").classList.add("hidden");
+            document.getElementById("3DModelContainer").classList.remove("hidden");
+        }
+
+        function calculateEnergy() {
+            const weight = parseFloat(document.getElementById("weight").value);
+            const stretch = parseFloat(document.getElementById("stretch").value);
+            const elasticForce = parseFloat(document.getElementById("elasticForce").value);
+            const height = parseFloat(document.getElementById("height").value);
+
+            // Обчислення повної механічної енергії
+            const energy1 = (elasticForce * stretch) / 2;
+            const energy2 = (elasticForce * stretch / 2) + (weight * height);
+            const totalEnergy = energy1 + energy2;
+
+            document.getElementById("result").innerText = `Повна механічна енергія: ${totalEnergy.toFixed(2)} Дж`;
+            document.getElementById("calculationResult").innerText = `Повна механічна енергія: ${totalEnergy.toFixed(2)} Дж`;
+            show3DModel();
+        }
+
+        function resetData() {
+            document.getElementById("dataForm").reset();
+            document.getElementById("result").innerText = "";
+            document.getElementById("calculationResult").innerText = "";
+        }
+
+        function goHome() {
+            document.getElementById("mainContent").classList.remove("hidden");
+            document.getElementById("calculationForm").classList.add("hidden");
+            document.getElementById("3DModelContainer").classList.add("hidden");
+        }
+    </script>
+</body>
+</html>
+
